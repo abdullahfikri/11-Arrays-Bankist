@@ -75,6 +75,69 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
 
+// for (const movement of movements) {
+for (const [i, movement] of movements.entries()) {
+  console.log(
+    `Movement ${i + 1}: ${
+      movement > 0
+        ? `You deposited ${movement}`
+        : `You withdraw ${Math.abs(movement)}`
+    }`
+  );
+}
+
+console.log(`----Using ForEach----`);
+movements.forEach(function (movement, i) {
+  console.log(
+    `Movement ${i + 1}: ${
+      movement > 0
+        ? `You deposited ${movement}`
+        : `You withdraw ${Math.abs(movement)}`
+    }`
+  );
+});
+console.log(`USING ARROW FUNCTIONS`);
+movements.forEach((movement, index) => {
+  console.log(
+    `Movement ${index + 1}: ${
+      movement > 0
+        ? `You deposited ${movement}`
+        : `You withdraw ${Math.abs(movement)}`
+    }`
+  );
+});
+console.log('');
+movements.forEach((el, i, arr, th) => {
+  console.log(`${(el + '').padEnd(7)} ${i}`);
+  // arr.splice(-1);
+});
+
+// 0 : function(200)
+// 1 : function(450)
+// 2 : function(-400)
+// and so on and so forth
+
+//ForEach Map
+const currenciesMap = new Map([
+  ['USD', 'United States dollar'],
+  ['EUR', 'Euro'],
+  ['GBP', 'Pound sterling'],
+]);
+
+currenciesMap.forEach(function (value, key, map) {
+  console.log(`${value} : ${key}`);
+  // console.log(map);
+});
+
+//ForEach Sets
+const currenciesSet = new Set(['USD', 'EUR', 'GPB', 'IDR', 'USD', 'EUR']);
+console.log(currenciesSet);
+currenciesSet.forEach(function (value, _, set) {
+  console.log(`${value} : ${value}`);
+  // console.log(set);
+});
+
+/*
 let arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
 
 console.log(`SLICE METHOD`);
@@ -99,3 +162,4 @@ const letters = arr.concat(arr2);
 console.log(letters);
 console.log([...arr, ...arr2]);
 console.log(letters.join(' '));
+*/
