@@ -80,10 +80,38 @@ const displayMovements = function (movements) {
 
 displayMovements(account1.movements);
 
+const createUsername = accounts =>
+  accounts.forEach(
+    acc =>
+      (acc.username = acc.owner
+        .toLowerCase()
+        .split(' ')
+        .map(word => word[0])
+        .join(''))
+  );
+createUsername(accounts);
+// user
+//   .toLowerCase()
+//   .split(' ')
+//   .map(word => word[0])
+//   .join('');
+
+// console.log(username);
+
+// console.log(createUsername('Steven Thomas Williams sa'));
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
 
+// Filter method
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+const deposited = movements.filter(mov => mov > 0);
+const withdrawal = movements.filter(mov => mov < 0);
+console.log(deposited);
+console.log(withdrawal);
+
+/*
 // MAP METHOD
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 const euroToUSD = 1.1;
@@ -105,6 +133,7 @@ const movementsDescriptions = movements.map(
 );
 
 console.log(movementsDescriptions);
+*/ ///
 /* 
 Julia and Kate are doing a study on dogs. So each of them asked 5 dog owners about their dog's age, and stored the data into an array (one array for each). For now, they are just interested in knowing whether a dog is an adult or a puppy. A dog is an adult if it is at least 3 years old, and it's a puppy if it's less than 3 years old.
 
