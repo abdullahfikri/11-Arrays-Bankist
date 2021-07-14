@@ -90,27 +90,34 @@ const createUsername = accounts =>
         .join(''))
   );
 createUsername(accounts);
-// user
-//   .toLowerCase()
-//   .split(' ')
-//   .map(word => word[0])
-//   .join('');
 
-// console.log(username);
+const calcPrintBalance = function (movements) {
+  const balance = movements.reduce((acc, move) => acc + move, 0);
+  labelBalance.textContent = `${balance} €`;
+};
 
-// console.log(createUsername('Steven Thomas Williams sa'));
-
+calcPrintBalance(account1.movements);
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
 
+// Reduce method
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+const balances = movements.reduce((acc, mov) => acc + mov, 0);
+console.log(balances);
+
+const max = movements.reduce((acc, mov) => (acc > mov ? acc : mov), 0);
+const max2 = Math.max(...movements);
+console.log(max, max2);
+
+/**
 // Filter method
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 const deposited = movements.filter(mov => mov > 0);
 const withdrawal = movements.filter(mov => mov < 0);
 console.log(deposited);
 console.log(withdrawal);
-
+*/
 /*
 // MAP METHOD
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
