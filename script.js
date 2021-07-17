@@ -33,7 +33,14 @@ const account4 = {
   pin: 4444,
 };
 
-const accounts = [account1, account2, account3, account4];
+const account5 = {
+  owner: 'Muhammad Fikri',
+  movements: [430, 1000, 700, 50, 90, 502, 1000],
+  interestRate: 1.6,
+  pin: 1234,
+};
+
+const accounts = [account1, account2, account3, account4, account5];
 
 // Elements
 const labelWelcome = document.querySelector('.welcome');
@@ -61,51 +68,80 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-const displayMovements = function (movements) {
-  containerMovements.innerHTML = '';
-  movements.forEach(function (move, index) {
-    const type = move > 0 ? 'deposit' : 'withdrawal';
-    const html = `
+///////////////////////////////////////////////////////////////////////////
+// Display label.textContent -------------------------------
+const displayLabel = (balance, income, outcome, interest) => {
+  if (balance) {
+    labelBalance.textContent = `${balance} €`;
+  } else if (income) {
+    labelSumIn.textContent = `${income} €`;
+  } else if (outcome) {
+    labelSumOut.textContent = `${outcome} €`;
+  } else if (interest) {
+    labelSumInterest.textContent = `${interest} €`;
+  }
+};
+
+// Function display all movement current account
+const displayHTMLMovement = (move, index) => {
+  const type = move > 0 ? 'deposit' : 'withdrawal';
+  const html = `
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${
-      index + 1
-    } ${type}</div>
-      <div class="movements__value">${move}</div>
+    index + 1
+  } ${type}</div>
+      <div class="movements__value">${move} €</div>
     </div>
     `;
+  containerMovements.insertAdjacentHTML('afterbegin', html);
+};
 
-    containerMovements.insertAdjacentHTML('afterbegin', html);
+const displayEachMovements = (movements, sort = false) => {
+  containerMovements.innerHTML = '';
+
+  const moves = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+  moves.forEach((move, index) => {
+    displayHTMLMovement(move, index);
   });
 };
-displayMovements(account1.movements);
+// display movement End --------------
 
-const calcPrintBalance = movements => {
-  const balance = movements.reduce((acc, move) => acc + move, 0);
-  labelBalance.textContent = `${balance} €`;
+// Function calculating balance account
+const calcPrintBalance = account => {
+  account.balance = account.movements.reduce((acc, move) => acc + move, 0);
+  displayLabel(account.balance);
 };
-calcPrintBalance(account1.movements);
 
-const calcDisplaySummary = movements => {
-  const income = movements
+const calcDisplaySummary = account => {
+  const income = account.movements
     .filter(move => move > 0)
     .reduce((acc, move) => acc + move, 0);
+  account.income = income;
 
-  const outcome = Math.abs(
-    movements.filter(move => move < 0).reduce((acc, move) => acc + move)
-  );
+  // Start Outcome --------------------------------
+  let out = account.movements.filter(move => move < 0);
+  if (out.length > 0) {
+    out = out.reduce((acc, move) => acc + move);
+  } else {
+    out = 0;
+  }
+  const outcome = Math.abs(out);
+  account.outcome = outcome;
+  //End of outcome -----------------------------------
 
-  const interest = movements
-    .map(move => (move * 1.2) / 100)
+  const interest = account.movements
+    .map(move => (move * account.interestRate) / 100)
     .filter(move => move >= 1)
-    .reduce((acc, move) => acc + move);
-  // console.log(interest);
+    .reduce((acc, move) => acc + move)
+    .toFixed(2);
 
-  labelSumIn.textContent = `${income} €`;
-  labelSumOut.textContent = `${outcome} €`;
-  labelSumInterest.textContent = `${interest} €`;
+  displayLabel(null, income);
+  displayLabel(null, null, outcome);
+  displayLabel(null, null, null, interest);
 };
-calcDisplaySummary(account1.movements);
 
+// Create user account ------------------------------
 const createUsername = accounts =>
   accounts.forEach(
     acc =>
@@ -116,11 +152,229 @@ const createUsername = accounts =>
         .join(''))
   );
 createUsername(accounts);
+// Create user account end ---------------------------
+
+//login handler -----------------------------------
+let currentUsername;
+btnLogin.addEventListener('click', e => {
+  e.preventDefault();
+  currentUsername = accounts.find(
+    acc => acc.username === inputLoginUsername.value
+  );
+
+  if (currentUsername?.pin === Number(inputLoginPin.value)) {
+    // Display UI
+    containerApp.style.opacity = 100;
+    // Welcome message
+    labelWelcome.textContent = `Welcome back, ${
+      currentUsername.owner.split(' ')[0]
+    }`;
+    //Clear input fields -----------------
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur(); //end clear input field --------------
+
+    //Calculate & display balance
+    calcPrintBalance(currentUsername);
+
+    // display movement
+    displayEachMovements(currentUsername.movements);
+
+    // Calculate & display summary
+    calcDisplaySummary(currentUsername);
+  } else if (!currentUsername) {
+    alert('Username not found');
+  } else {
+    alert(`Username or Password wrong`);
+  }
+});
+//end login addEventListener ------------------------------------
+
+//Transfer event listener start ------------------------
+btnTransfer.addEventListener('click', e => {
+  e.preventDefault();
+
+  const amount = Number(inputTransferAmount.value);
+  const to = accounts.find(acc => acc.username === inputTransferTo.value);
+
+  if (amount <= 0) {
+    alert(`Balance can't be negative`);
+  } else if (amount > currentUsername.balance) {
+    alert(`You balance not enough`);
+  } else if (!to) {
+    alert('Receiver not found');
+  } else if (to.username === currentUsername.username) {
+    alert(`Receiver can't be yourself`);
+  } else {
+    const userMovement = currentUsername.movements;
+    to.movements.push(amount); //add positive move to receiver
+    userMovement.push(-amount); // add negative to current user
+
+    const lastMovementIndex = userMovement.length - 1;
+
+    // update ui display move -----------
+    displayHTMLMovement(userMovement[lastMovementIndex], lastMovementIndex);
+    // update move End -------------
+
+    //Update balance display ------------------------
+    currentUsername.balance += userMovement[lastMovementIndex];
+    displayLabel(currentUsername.balance);
+    // Update balance end ---------------------------
+
+    //Update outcome summary ------------------------
+    currentUsername.outcome += Math.abs(userMovement[lastMovementIndex]);
+    labelSumOut.textContent = `${currentUsername.outcome} €`;
+    // End update outcome summary --------------------
+
+    //Clear input fields --------------------
+    inputTransferAmount.value = inputTransferTo.value = '';
+
+    alert(`Success transfer to ${to.username}`);
+  }
+});
+// Transfer event listener end ------------------------------------
+
+// Loan event handler -----------------------------------
+btnLoan.addEventListener('click', e => {
+  e.preventDefault();
+
+  const requestLoan = Number(inputLoanAmount.value);
+  if (currentUsername.movements.some(deposit => deposit > requestLoan * 0.1)) {
+    // Add new deposit to array movements && array Balance --------
+    currentUsername.movements.push(requestLoan);
+    const indexLastMove = currentUsername.movements.length - 1;
+    const lastMovement = currentUsername.movements[indexLastMove];
+    //display update movement --------
+    displayHTMLMovement(lastMovement, indexLastMove);
+    //display update balance --------
+    currentUsername.balance += lastMovement;
+    displayLabel(currentUsername.balance);
+
+    // Display summary income --------
+    currentUsername.income += lastMovement;
+    displayLabel(null, currentUsername.income);
+    // Display summary income ----------
+    const interest = currentUsername.movements
+      .map(move => (move * currentUsername.interestRate) / 100)
+      .filter(move => move >= 1)
+      .reduce((acc, move) => acc + move)
+      .toFixed(2);
+
+    displayLabel(null, null, null, interest);
+
+    // Reset form field
+    alert(`Success to loan money`);
+    inputLoanAmount.value = '';
+  } else {
+    console.log(`You'r loan can't be accepted`);
+  }
+});
+// Loand event handler END ---------------------------
+
+// Delete account btn event listener ------------------------------
+btnClose.addEventListener('click', e => {
+  e.preventDefault();
+
+  if (
+    currentUsername.username === inputCloseUsername.value &&
+    currentUsername.pin === Number(inputClosePin.value)
+  ) {
+    // Delete account --------------
+    accounts.splice(
+      accounts.findIndex(acc => acc.username === currentUsername.username),
+      1
+    );
+    //Reset form ---------------
+    inputCloseUsername.value = inputClosePin.value = '';
+
+    // Hide UI --------------
+    containerApp.style.opacity = 0;
+  } else {
+    alert(`Username or Pin incorrect`);
+  }
+}); // Close button event end --------------------------------
+
+// Sort the movements and display it ------------------
+let sortStatus = false;
+btnSort.addEventListener('click', e => {
+  e.preventDefault();
+  displayEachMovements(currentUsername.movements, !sortStatus);
+  sortStatus = !sortStatus;
+});
+// Sort the movements end --------------------------------
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
 
+/*
+//Sort
+const acc2Move = account2.movements.slice();
+console.log(acc2Move);
+
+// return < 0, A, B to keep the order
+// return > 0, A, B to switch the order
+
+//Ascending sort
+acc2Move.sort((a, b) => {
+  if (a < b) return -1;
+  if (a > b) return 1;
+});
+console.log(acc2Move);
+
+//descending Sort
+acc2Move.sort((a, b) => {
+  if (a < b) return 1;
+  if (a > b) return -1;
+});
+console.log(acc2Move);
+*/
+/*
+// Flat array Method
+const arr = [1, 2, [3, 4, 5], 6, 7, [8, 9, 0]];
+console.log(arr);
+console.log(arr.flat());
+
+const arrMoreDeep = [1, 2, [3, [4, 5]], 6, 7, [[8, 9], 0]];
+console.log(arrMoreDeep.flat(2));
+
+//Calculating avarage of balance
+const accountsMovement = accounts
+  .map(acc => acc.movements)
+  .flat()
+  .reduce((acc, move, i, arr) => acc + move, 0);
+console.log(accountsMovement);
+
+// Flat map
+const accountsMovement2 = accounts
+  .flatMap(acc => acc.movements)
+  .reduce((acc, move) => acc + move, 0);
+console.log(accountsMovement2);
+*/
+
+// console.log(accountsMovement.flat().length);
+
+/*
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+console.log(movements.includes(-130));
+
+//SOME Array Method
+// IF one can satisfy the condition the method will return true
+console.log(movements.some(move => move > 0));
+
+//EVERY Array Method
+// If all element can satisfy the condition the method will return true;
+console.log(movements.every(move => move > 0));
+console.log(account5.movements.every(move => move > 0));
+console.log('');
+
+//Separate callback
+const deposit = move => move > 0;
+console.log(movements.some(deposit));
+console.log(movements.every(deposit));
+console.log(movements.filter(deposit));
+*/
+/*
 // Find METHOD Array
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
@@ -142,7 +396,7 @@ for (const acc of accounts) {
     console.log(acc);
   }
 }
-
+*/
 ///////////////////////////////////////
 // Coding Challenge #2 & #3
 
