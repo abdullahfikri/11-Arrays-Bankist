@@ -302,9 +302,40 @@ btnSort.addEventListener('click', e => {
 });
 // Sort the movements end --------------------------------
 
-/////////////////////////////////////////////////
+///////////////////////s//////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
+
+console.log([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+console.log(new Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+
+// Array new and Fill method ------
+const x = new Array(10);
+console.log(x);
+x.fill(1, 4, 8);
+console.log(x);
+
+// Array from--------
+const y = Array.from({ length: 10 }, () => 1);
+console.log(y);
+
+const z = Array.from({ length: 10 }, (_, i) => i + 1);
+console.log(z);
+
+const rollDiceArray = Array.from({ length: 100 }, (_, i) =>
+  Math.floor(Math.random() * (6 - 1 + 1) + 1)
+);
+console.log(rollDiceArray);
+
+labelBalance.addEventListener('click', e => {
+  const node = Array.from(document.querySelectorAll('.movements__value'), el =>
+    Number(el.textContent.replace(' €', ''))
+  );
+  console.log(node);
+
+  const node2 = [...document.querySelectorAll('.movements__value')];
+  console.log(node2.map(el => el.textContent));
+});
 
 /*
 //Sort
