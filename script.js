@@ -306,6 +306,28 @@ btnSort.addEventListener('click', e => {
 /////////////////////////////////////////////////
 // LECTURES
 
+///////////////////////////////////////////
+// Array methods practice
+
+// 1,
+const bankDepositSum = accounts
+  .flatMap(acc => acc.movements)
+  .filter(move => move > 0)
+  .reduce((acc, move) => acc + move, 0);
+console.log(bankDepositSum);
+
+// 2.
+// const depositMoreThousand = accounts
+//   .flatMap(acc => acc.movements)
+//   .filter(move => move >= 1000).length;
+const depositMoreThousand = accounts
+  .flatMap(acc => acc.movements)
+  .reduce((count, move) => (move >= 1000 ? ++count : count), 0);
+
+console.log(depositMoreThousand);
+
+/*
+//NEW ARRAY AND FILLING IT ------
 console.log([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 console.log(new Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 
@@ -336,6 +358,7 @@ labelBalance.addEventListener('click', e => {
   const node2 = [...document.querySelectorAll('.movements__value')];
   console.log(node2.map(el => el.textContent));
 });
+*/
 
 /*
 //Sort
